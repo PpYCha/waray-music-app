@@ -1,14 +1,16 @@
-import React, {useState} from 'react';
-import {View, Text, Button} from 'react-native';
+import React, {useState, useEffect} from 'react';
+import {View, Text, Button, FlatList, TouchableOpacity} from 'react-native';
 import DocumentPicker from 'react-native-document-picker';
 import RNFetchBlob from 'rn-fetch-blob';
 import firebaseStup from '../setup';
 import getDownloadURL from '@react-native-firebase/storage';
-// import database from '@react-native-firebase/database';
-// import storage from '@react-native-firebase/storage';
+import {useNavigation} from '@react-navigation/native';
 
 const HomeScreen = () => {
+  const navigation = useNavigation();
   const {storage, database} = firebaseStup();
+  const [filesList, setFilesList] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
 
   async function chooseFile() {
     try {
@@ -117,10 +119,41 @@ const HomeScreen = () => {
       fileURL: downloadURL,
     });
   }
+
+  useEffect(() => {
+    //start This is only for development
+    setFilesList([]);
+    //end
+    const onChildAdded = database()
+      .ref(`music`)
+      .on('child_added', snapshot => {
+        let helperArray = [];
+        helperArray.push(snapshot.val());
+        setFilesList(files => [...files, ...helperArray]);
+        console.log(snapshot.val());
+      });
+    return () => database().ref(`music`).off('child_added', onChildAdded);
+  }, []);
+
+  const Item = ({item, onPress}) => (
+    <TouchableOpacity onPress={() => navigation.navigate('Music')}>
+      <Text>{item.fileName}</Text>
+    </TouchableOpacity>
+  );
+
+  const renderItem = ({item}) => {
+    return <Item item={item} onPress={() => setSelectedId(item.id)} />;
+  };
+
   return (
     <View>
       <Button title="Select File" onPress={chooseFile} />
-      <Button title="Upload File" onPress={uploadFile} />
+      <FlatList
+        data={filesList}
+        renderItem={renderItem}
+        keyExtractor={item => item.fileURL}
+        extraData={selectedId}
+      />
     </View>
   );
 };
