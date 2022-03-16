@@ -1,22 +1,117 @@
-import React from 'react'
-import {Button} from 'react-native'
-import SoundPlayer from 'react-native-sound-player'
-// import { getStorage, ref, getDownloadURL } from "@react-native-firebase/storage";
+import React, {useEffect} from 'react'
+import TrackPlayer from 'react-native-track-player'
+import {Button, Text, View} from 'react-native'
+import RNFetchBlob from 'rn-fetch-blob'
+import { storage, getStorage, ref, getDownloadURL } from "@react-native-firebase/storage";
 import firebase from "@react-native-firebase/app";
 
+
+
+const tracks = [
+  {
+    id: 1,
+    url: require('../assets/music/2.mp3'),
+    title: 'Blues Beat',
+  },
+  {
+    id: 2,
+    url: require('../assets/music/1.mp3'),
+    title: 'Blues Beat',
+  },
+  {
+    id: 3,
+    url: 'https://firebasestorage.googleapis.com/v0/b/waray-music-app.appspot.com/o/music%2FYou%20Are%20The%20Reason%20-%20Calum%20Scott%20-%20Cover%20by%20Daryl?alt=media&token=5f06bb28-97e7-472f-bc63-864f961b86cc',
+    title: 'Blues Beat',
+  },
+  {
+    id: 4,
+    title: 'Awful',
+   
+    url: 'https://firebasestorage.googleapis.com/v0/b/spotify-clone-7a2ef.appspot.com/o/Ringtone%2FAudio%2FAwful%20-%20josh%20pan.mp3?alt=media&token=5b174d4c-be09-417c-9fb8-b384f3ce0ec2',
+  },
+];
+
+TrackPlayer.updateOptions({
+  stopWithApp: false,
+  capabilities: [TrackPlayer.CAPABILITY_PLAY, TrackPlayer.CAPABILITY_PAUSE],
+  compactCapabilities: [
+    TrackPlayer.CAPABILITY_PLAY,
+    TrackPlayer.CAPABILITY_PAUSE,
+  ],
+});
+
 const MusicScreen = () => {
-    const play =() =>{
-        try {
-            // play the file tone.mp3
-            SoundPlayer.playSoundFile('tone', 'mp3')
-            // or play from url
-            SoundPlayer.playUrl("https://firebasestorage.googleapis.com/v0/b/waray-music-app.appspot.com/o/music%2FMoana%20-%20How%20Far%20I'll%20Go%20%5BBand%3A%20Boy%20Hero%5D%20(Punk%20Goe?alt=media&token=9f04e8a2-6207-4d19-b88d-8f2b4ad0e62d")
-        } catch (e) {
-            console.log(`cannot play the sound file`, e)
+
+  const setUpTrackPlayer = async () => {
+    try {
+      await TrackPlayer.setupPlayer();
+      await TrackPlayer.add(tracks);
+      console.log('Tracks added');
+      // TrackPlayer.play()
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    setUpTrackPlayer();
+
+    // return () => TrackPlayer.destroy();
+  }, []);
+
+     const donwloadSong =  () =>{
+       console.log('download')
+       createAppDir = async                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 () => {
+        const granted = await PermissionsAndroid.request(
+            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+        );
+    
+        const isGranted = granted === PermissionsAndroid.RESULTS.GRANTED || granted === true;
+    
+        if (isGranted === PermissionsAndroid.RESULTS.GRANTED) {
+            const assetsDirExists = await RNFetchBlob.fs.isDir(GlobalVars.APPDIR);
+            if(!assetsDirExists) {
+                RNFetchBlob.fs.mkdir(GlobalVars.APPDIR)
+                                .then((res) => {console.log("App directory created..")})
+                                .catch((err) => {console.log(err)})
+            }
         }
     }
+    
+
+    
+    }
+
+
+
+    
   return (
-    <Button title="Play song"  onPress={play}/>
+    <View>
+
+    <Button title="Play song"  onPress={() =>{ TrackPlayer.play() 
+    return(
+      console.log("play")
+    )  
+  }
+    
+  }/>
+    <Button title="Pause song"  onPress={() => {TrackPlayer.pause()
+     return(
+      console.log("Pause")
+    )  
+    }}/>
+    <Button title="Previous song"  onPress={() => {TrackPlayer.skipToPrevious()
+     return(
+      console.log("Previous")
+    )  
+    }}/>
+    <Button title="Next song"  onPress={() => {TrackPlayer.skipToNext()
+     return(
+      console.log("Next")
+    )  }}/>
+    <Button title="Download Song" onPress={donwloadSong} />
+    </View>
+
   )
 }
 
@@ -25,8 +120,8 @@ export default MusicScreen
 
 
 var storageRef = firebase.storage().ref("music/James Smith - Little love (lyrics).mp3");
-const storage = firebase.storage();
-storageRef.getDownloadURL((storage, 'music/James Smith - Little love (lyrics).mp3'))
+
+storageRef.getDownloadURL((storage, 'music/My6OolA3QsJFk6kjzhv.mp'))
   .then((url) => {
     // `url` is the download URL for 'images/stars.jpg'
 
